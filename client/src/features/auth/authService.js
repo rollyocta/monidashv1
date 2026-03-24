@@ -1,7 +1,7 @@
 // src/features/auth/authService.js
 import axios from "axios";
 
-const API_URL = "https://monidashv1.onrender.com/api/users";
+const API_URL = "http://localhost:5000/api/users";
 
 // REGISTER
 export const register = async (userData) => {

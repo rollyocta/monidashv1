@@ -42,7 +42,7 @@ function AddIncome({ incomes, setIncomes }) {
   useEffect(() => {
     const fetchIncomes = async () => {
       try {
-        const res = await axios.get("https://monidashv1.onrender.com/api/incomes", {
+        const res = await axios.get("http://localhost:5000/api/incomes", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setIncomes(res.data);
@@ -88,7 +88,7 @@ function AddIncome({ incomes, setIncomes }) {
     const oldLevel = user.level;
 
     try {
-      const res = await axios.post("https://monidashv1.onrender.com/api/incomes", form, { 
+      const res = await axios.post("http://localhost:5000/api/incomes", form, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
 
@@ -121,11 +121,11 @@ function AddIncome({ incomes, setIncomes }) {
       return;
     }
     try {
-      await axios.delete(`https://monidashv1.onrender.com/api/incomes/${selectedInc._id}`, {
+      await axios.delete(`http://localhost:5000/api/incomes/${selectedInc._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setIncomes((prev) => prev.filter((i) => i._id !== selectedInc._id));
-      const resUser = await axios.get("https://monidashv1.onrender.com/api/users/profile", {
+      const resUser = await axios.get("http://localhost:5000/api/users/profile", {
           headers: { Authorization: `Bearer ${token}` }
       });
       setUser(resUser.data);
