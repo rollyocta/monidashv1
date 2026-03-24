@@ -47,7 +47,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/expenses", {
+        const res = await axios.get("https://monidashv1.onrender.com/api/expenses", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setExpenses(res.data);
@@ -85,7 +85,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
   const handleConfirmDelete = async () => {
     setIsModalOpen(false);
     try {
-      const res = await axios.delete(`http://localhost:5000/api/expenses/${selectedId}`, {
+      const res = await axios.delete(`https://monidashv1.onrender.com/api/expenses/${selectedId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setExpenses((prev) => prev.filter((exp) => exp._id !== selectedId));
@@ -109,7 +109,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/expenses", form, {
+      const res = await axios.post("https://monidashv1.onrender.com/api/expenses", form, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setExpenses((prev) => [res.data.expense, ...(prev || [])]);
@@ -126,7 +126,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
     setClaiming(true);
     const oldLevel = user.level;
     try {
-      const res = await axios.post("http://localhost:5000/api/expenses/claim-xp", {}, {
+      const res = await axios.post("https://monidashv1.onrender.com/api/expenses/claim-xp", {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser((prev) => ({ ...prev, ...res.data }));

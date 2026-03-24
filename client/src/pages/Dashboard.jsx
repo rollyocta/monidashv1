@@ -19,10 +19,10 @@ function Dashboard() {
       try {
         setLoading(true);
         const [resIncomes, resExpenses] = await Promise.all([
-          axios.get("http://localhost:5000/api/incomes", {
+          axios.get("https://monidashv1.onrender.com/api/incomes", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/expenses", {
+          axios.get("https://monidashv1.onrender.com/api/expenses", {
             headers: { Authorization: `Bearer ${token}` },
           })
         ]);
