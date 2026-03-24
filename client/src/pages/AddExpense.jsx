@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useMemo } from "react";
 import { AuthContext } from "../context/AuthContext.jsx";
-import axios from "axios";
+// 1. Pinalitan ang standard axios ng axiosInstance
+import axiosInstance from "../api/axiosInstance"; 
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal.jsx";
 import XPToast from "../components/XPToast.jsx";
 import LevelUpModal from "../components/LevelUpModal.jsx";
@@ -44,12 +45,11 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // --- FETCH LOGIC UPDATED ---
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/expenses", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axiosInstance.get("/expenses");
         setExpenses(res.data);
       } catch (err) {
         console.error("Error fetching expenses:", err);
@@ -82,12 +82,11 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
     setIsModalOpen(true);
   };
 
+  // --- DELETE LOGIC UPDATED ---
   const handleConfirmDelete = async () => {
     setIsModalOpen(false);
     try {
-      const res = await axios.delete(`http://localhost:5000/api/expenses/${selectedId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axiosInstance.delete(`/expenses/${selectedId}`);
       setExpenses((prev) => prev.filter((exp) => exp._id !== selectedId));
       setUser((prev) => ({ ...prev, ...res.data }));
       setShowPenalty(true);
@@ -97,6 +96,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
     }
   };
 
+  // --- SUBMIT LOGIC UPDATED ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -109,9 +109,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/expenses", form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.post("/expenses", form);
       setExpenses((prev) => [res.data.expense, ...(prev || [])]);
       setUser((prev) => ({ ...prev, ...res.data }));
       setForm({ amount: "", source: "income", category: "Food", description: "" });
@@ -122,13 +120,12 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
     }
   };
 
+  // --- CLAIM XP LOGIC UPDATED ---
   const handleClaimXP = async () => {
     setClaiming(true);
     const oldLevel = user.level;
     try {
-      const res = await axios.post("http://localhost:5000/api/expenses/claim-xp", {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.post("/expenses/claim-xp", {});
       setUser((prev) => ({ ...prev, ...res.data }));
       setShowXP(true);
       if (res.data.level > oldLevel) {
@@ -163,7 +160,7 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
               <p className="text-red-500 text-[10px] font-black uppercase tracking-[0.3em]">System Damage Protocol v3.1</p>
             </div>
 
-            {/* DAILY QUEST TRACKER - Mobile Optimized */}
+            {/* DAILY QUEST TRACKER */}
             <div className="bg-slate-900/50 border border-slate-800 p-3 rounded-sm w-full lg:w-auto lg:min-w-[320px]">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Daily Quest Progress</span>
@@ -284,7 +281,6 @@ function AddExpense({ expenses, setExpenses, setUser, user }) {
             </table>
           </div>
 
-          {/* Compact Mobile-Friendly Pagination */}
           <div className="p-4 bg-slate-950 border-t border-slate-800 flex justify-between items-center gap-2 text-[9px] font-black uppercase tracking-widest">
             <button 
               disabled={currentPage === 1} 

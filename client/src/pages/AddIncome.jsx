@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useMemo } from "react";
 import { AuthContext } from "../context/AuthContext.jsx";
-import axios from "axios";
+// 1. Pinalitan ang standard axios ng axiosInstance
+import axiosInstance from "../api/axiosInstance"; 
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal.jsx";
 import XPToast from "../components/XPToast.jsx";
 import LevelUpModal from "../components/LevelUpModal.jsx";
@@ -17,7 +18,6 @@ function AddIncome({ incomes, setIncomes }) {
     { value: "Others", label: "✨ Rare Drop / Others" },
   ];
 
-  // --- ALL STATES PRESERVED ---
   const [form, setForm] = useState({ amount: "", source: "Salary", description: "", savingsPercent: 20 });
   const [loading, setLoading] = useState(false);
   const [showXP, setShowXP] = useState(false); 
@@ -38,13 +38,12 @@ function AddIncome({ incomes, setIncomes }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; 
 
-  // --- FETCH LOGIC PRESERVED ---
+  // --- FETCH LOGIC UPDATED ---
   useEffect(() => {
     const fetchIncomes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/incomes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Pinalitan ng axiosInstance at tinanggal ang localhost/headers
+        const res = await axiosInstance.get("/incomes");
         setIncomes(res.data);
       } catch (err) {
         console.error("Error fetching incomes:", err);
@@ -53,7 +52,6 @@ function AddIncome({ incomes, setIncomes }) {
     if (token) fetchIncomes();
   }, [token, setIncomes]);
 
-  // --- FILTERING & PAGINATION LOGIC PRESERVED ---
   const filteredIncomes = useMemo(() => {
     return incomes.filter((inc) => {
       const matchesSource = filterSource === "All" || inc.source === filterSource;
@@ -74,7 +72,7 @@ function AddIncome({ incomes, setIncomes }) {
   const hpFortification = (Number(form.amount) * form.savingsPercent) / 100;
   const manaRestored = Number(form.amount) - hpFortification;
 
-  // --- SUBMIT HANDLER WITH LEVEL UP LOGIC ---
+  // --- SUBMIT HANDLER UPDATED ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (Number(form.amount) <= 0) {
@@ -88,14 +86,12 @@ function AddIncome({ incomes, setIncomes }) {
     const oldLevel = user.level;
 
     try {
-      const res = await axios.post("http://localhost:5000/api/incomes", form, { 
-        headers: { Authorization: `Bearer ${token}` } 
-      });
+      // Pinalitan ng axiosInstance at tinanggal ang localhost/headers
+      const res = await axiosInstance.post("/incomes", form);
 
       setIncomes((prev) => [res.data.income, ...prev]);
       setUser((prev) => ({ ...prev, ...res.data.user }));
 
-      // Trigger Level Up Modal if level increased
       if (res.data.user.level > oldLevel) {
         setLevelAtClaim(res.data.user.level);
         setTimeout(() => setIsLevelUpOpen(true), 1200);
@@ -115,19 +111,21 @@ function AddIncome({ incomes, setIncomes }) {
     }
   };
 
+  // --- DELETE ACTION UPDATED ---
   const handleAction = async () => {
     if (modalMode === "blocked") {
       setIsModalOpen(false);
       return;
     }
     try {
-      await axios.delete(`http://localhost:5000/api/incomes/${selectedInc._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Pinalitan ng axiosInstance at tinanggal ang localhost/headers
+      await axiosInstance.delete(`/incomes/${selectedInc._id}`);
+      
       setIncomes((prev) => prev.filter((i) => i._id !== selectedInc._id));
-      const resUser = await axios.get("http://localhost:5000/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` }
-      });
+      
+      // Update profile using axiosInstance
+      const resUser = await axiosInstance.get("/users/profile");
+      
       setUser(resUser.data);
       setShowPenalty(true);
       setTimeout(() => setShowPenalty(false), 2000);
@@ -142,7 +140,6 @@ function AddIncome({ incomes, setIncomes }) {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto p-4 text-slate-200 font-sans">
-      {/* --- MODALS & TOASTS --- */}
       <LevelUpModal isOpen={isLevelUpOpen} onClose={() => setIsLevelUpOpen(false)} newLevel={levelAtClaim} />
       <XPToast show={showXP} amount={xpAmount} message="Loot Secured!" />
       <XPToast show={showPenalty} amount={-20} message="Loot Reversed!" />
@@ -155,7 +152,6 @@ function AddIncome({ incomes, setIncomes }) {
         message={modalMode === "blocked" ? "Insufficient Mana or HP to reverse this loot." : "Delete record? (-20 XP Penalty)"}
       />
 
-      {/* --- INPUT TERMINAL --- */}
       <div className="bg-slate-900 border border-slate-800 p-1 rounded-sm shadow-2xl">
         <div className="bg-slate-950 p-6 border border-slate-800/50">
           <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
@@ -192,13 +188,13 @@ function AddIncome({ incomes, setIncomes }) {
                 
                 <div className="flex justify-between mt-4">
                    <div className="flex-1 text-center">
-                      <p className="text-[8px] text-slate-500 font-black uppercase">To HP (Savings)</p>
-                      <p className="text-[11px] font-mono font-bold text-emerald-400">+₱{hpFortification.toLocaleString()}</p>
+                     <p className="text-[8px] text-slate-500 font-black uppercase">To HP (Savings)</p>
+                     <p className="text-[11px] font-mono font-bold text-emerald-400">+₱{hpFortification.toLocaleString()}</p>
                    </div>
                    <div className="w-[1px] bg-slate-800 mx-2"></div>
                    <div className="flex-1 text-center">
-                      <p className="text-[8px] text-slate-500 font-black uppercase">To Mana (Cash)</p>
-                      <p className="text-[11px] font-mono font-bold text-cyan-400">+₱{manaRestored.toLocaleString()}</p>
+                     <p className="text-[8px] text-slate-500 font-black uppercase">To Mana (Cash)</p>
+                     <p className="text-[11px] font-mono font-bold text-cyan-400">+₱{manaRestored.toLocaleString()}</p>
                    </div>
                 </div>
               </div>
@@ -217,7 +213,6 @@ function AddIncome({ incomes, setIncomes }) {
         </div>
       </div>
 
-      {/* --- HISTORY TABLE WITH PAGINATION & SEARCH --- */}
       <div className="bg-slate-900 border border-slate-800 p-1 rounded-sm shadow-xl">
         <div className="bg-slate-950 border border-slate-800/50 overflow-hidden">
           <div className="p-4 bg-slate-900/30 border-b border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -267,7 +262,6 @@ function AddIncome({ incomes, setIncomes }) {
             </table>
           </div>
 
-          {/* --- PAGINATION FOOTER PRESERVED --- */}
           <div className="p-4 bg-slate-950 border-t border-slate-800 flex justify-between items-center gap-2 text-[9px] font-black uppercase tracking-widest">
             <button 
               disabled={currentPage === 1} 
