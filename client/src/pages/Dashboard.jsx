@@ -3,8 +3,7 @@ import { AuthContext } from "../context/AuthContext.jsx";
 import Index from "./Index.jsx";
 import AddIncome from "./AddIncome.jsx";
 import AddExpense from "./AddExpense.jsx";
-// 1. Dito natin pinalitan ang standard axios ng instance mo
-import axiosInstance from "../api/axiosInstance"; 
+import axios from "axios";
 
 function Dashboard() {
   const { token, user, setUser, logout } = useContext(AuthContext);
@@ -19,13 +18,14 @@ function Dashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // 2. Mapapansin mo, wala nang "local Backend" 
-        // at wala na ring manual "headers: Authorization" dahil automatic na 'yan sa axiosInstance
         const [resIncomes, resExpenses] = await Promise.all([
-          axiosInstance.get("/incomes"),
-          axiosInstance.get("/expenses")
+          axios.get("https://monidashv1.onrender.com/api/incomes", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("https://monidashv1.onrender.com/api/expenses", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
         ]);
-        
         setIncomes(resIncomes.data);
         setExpenses(resExpenses.data);
       } catch (err) {
@@ -101,6 +101,7 @@ function Dashboard() {
              <div className="h-[1px] flex-1 bg-slate-800"></div>
           </div>
 
+          {/* ACTIVE TABS */}
           {[
             { id: "dashboard", label: "Status Window", icon: "◈" },
             { id: "add-income", label: "Income Entry", icon: "◆" },
@@ -120,6 +121,7 @@ function Dashboard() {
             </button>
           ))}
 
+          {/* DISABLED / UPCOMING TABS */}
           <div className="px-4 mt-4 mb-2 flex items-center gap-2">
              <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">In Development</span>
              <div className="h-[1px] flex-1 bg-slate-800/50"></div>
