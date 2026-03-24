@@ -17,7 +17,7 @@ const app = express();
 
 // 1. CORS Configuration
 app.use(cors({
-  origin: 'http://localhost:5173', // I-match sa Vite port mo
+  origin: 'https://monidashv1.vercel.app/', // I-match sa Vite port mo
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
